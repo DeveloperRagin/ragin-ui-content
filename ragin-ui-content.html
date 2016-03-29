@@ -1,0 +1,124 @@
+<!--
+@license
+Copyright (c) 2016 Glenn Vandeuren. All rights reserved.
+-->
+
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-selector/iron-selector.html">
+
+<!--
+An element providing a solution handling 'DeveloperRagin' content & plugins.
+
+Example:
+
+    <ragin-ui-content></ragin-ui-content>
+
+Example:
+
+    <ragin-ui-content plugins='['ragin-todo', 'ragin-time', ragin-yslow]'></ragin-ui-content>
+
+@demo demo/index.html
+@hero hero.svg
+-->
+
+<dom-module id="ragin-ui-content">
+  <template>
+    <style>
+      :host {
+        display: block;
+        box-sizing: border-box;
+      }
+    </style>
+    <iron-selector selected="{{selected}}" attr-for-selected="item-name"></iron-selector>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'ragin-ui-content',
+
+      properties: {
+        /**
+         * The plugins/content to import.
+         *
+         * @type ["ragin-todo", "ragin-time"]
+         */
+        plugins: {
+          type: Array,
+          observer: '__pluginsChanged__'
+        },
+
+        componentsPath: {
+          type: String,
+          value: 'bower_components/'
+        },
+
+        /**
+         * The 'name' of the current selected plugin
+         *
+         * @type "item-name"
+         */
+        selected: String
+      },
+
+      __pluginsChanged__: function(plugins) {
+        plugins.forEach(function(plugin) {
+          this.importPlugin(plugin);
+        }.bind(this));
+      },
+
+      /**
+       * Import the plugins when.
+       *
+       * @param {string} A plugin-name.
+       */
+      importPlugin: function(plugin) {
+        this.importHref(this.componentsPath + plugin + '/' + plugin + '.html', this._importHandler.bind(this), this._importHandler.bind(this));
+      },
+
+      /**
+       * The handler for plugins after their loaded.
+       *
+       * @param {object} event 'import-event' when loaded.
+       * @return {Promise}.resolve({'name': 'plugin-name', 'module': 'dom-module'})
+       * @return {Promise}.reject({'name': 'plugin-name', 'module': 'dom-module'})
+       */
+      _importHandler: function(event) {
+        return new Promise(function(resolve, reject) {
+          if (event.type === 'error') {
+            this._fireImportError('GET', Polymer.dom(event).localTarget.href, ' 404 (Not Found)');
+
+            Promise.reject('GET', Polymer.dom(event).localTarget.href, ' 404 (Not Found)');
+          } else {
+            var domM = event.path[0].import.body.querySelector('dom-module');
+            var data = {'name': domM.id, 'module': domM};
+            this._fireImportLoad(data);
+            this._handlePuginImport(data);
+
+            Promise.resolve(data);
+          }
+        }.bind(this));
+      },
+
+      _fireImportLoad: function(event) {
+        this.fire('ragin-ui-content-import-load', event.detail);
+      },
+
+      /**
+       * The `ragin-ui-content-import-error` event is fired whenever `_fireImportError` is called.
+       *
+       * @event ragin-ui-content-import-error
+       * @return {Promise}.reject(error)
+       */
+      _fireImportError: function(error) {
+        this.fire('ragin-ui-content-import-error', new Error(error));
+      },
+
+      _handlePuginImport: function(pl) {
+        var plugin = document.createElement(pl.name);
+        plugin.setAttribute('item-name', pl.name.replace('ragin-', ''));
+        var selector = this.$$('iron-selector');
+        selector.appendChild(plugin);
+      }
+    });
+  </script>
+</dom-module>
