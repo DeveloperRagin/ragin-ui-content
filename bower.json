@@ -1,8 +1,8 @@
 {
   "name": "ragin-ui-content",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "authors": [
-    "Glenn Vandeuren<vandeurenglenn@gmail.com>"
+    "Glenn Vandeuren <vandeurenglenn@gmail.com>"
   ],
   "description": "An element providing a solution handling 'DeveloperRagin' content & plugins.",
   "keywords": [
@@ -24,7 +24,7 @@
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
     "web-component-tester": "^4.0.0",
-    "ragin-todo": "DeveloperRagin/ragin-todo",
+    "ragin-todo": "1.0.0",
     "iron-demo-helpers": "^1.2.2"
   }
 }
